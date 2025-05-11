@@ -21,19 +21,29 @@ async function getMealInfo() {
     // 로딩 상태 표시
     button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 로딩중...';
     button.disabled = true;
-    
-    const apiUrl = `https://open.neis.go.kr/hub/mealServiceDietInfo?ATPT_OFCDC_SC_CODE=J10&SD_SCHUL_CODE=7530553&MLSV_YMD=${formattedDate}&Type=json`;
 
     try {
-        const response = await fetch(apiUrl);
-        const data = await response.json();
-
-        if (data.RESULT || !data.mealServiceDietInfo) {
+        const response = await fetch(`https://open.neis.go.kr/hub/mealServiceDietInfo?ATPT_OFCDC_SC_CODE=J10&SD_SCHUL_CODE=7530553&MLSV_YMD=${formattedDate}`);
+        const text = await response.text();
+        
+        // XML 응답을 파싱
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(text, "text/xml");
+        
+        // 에러 체크
+        const errorCode = xmlDoc.querySelector('CODE');
+        if (errorCode) {
             showError('해당 날짜의 급식 정보가 없습니다.');
             return;
         }
 
-        const mealInfo = data.mealServiceDietInfo[1].row[0];
+        // 급식 정보 파싱
+        const mealInfo = {
+            DDISH_NM: xmlDoc.querySelector('DDISH_NM')?.textContent || '',
+            ORPLC_INFO: xmlDoc.querySelector('ORPLC_INFO')?.textContent || '',
+            NTR_INFO: xmlDoc.querySelector('NTR_INFO')?.textContent || ''
+        };
+
         displayMealInfo(mealInfo);
     } catch (error) {
         showError('급식 정보를 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.');
@@ -96,18 +106,12 @@ function displayMealInfo(mealInfo) {
         '철분': '3.1mg'
     };
 
-    const nutritionItems = Object.entries(nutritionValues).map(([label, value]) => ({
-        icon: getNutritionIcon(label),
-        label,
-        value
-    }));
-
     nutritionInfo.innerHTML = `
         <h2><i class="fas fa-chart-pie"></i> 영양 정보</h2>
-        ${nutritionItems.map(item => `
+        ${Object.entries(nutritionValues).map(([label, value]) => `
             <div class="nutrition-item">
-                <i class="fas ${item.icon}"></i>
-                ${item.label}: ${item.value}
+                <i class="fas ${getNutritionIcon(label)}"></i>
+                ${label}: ${value}
             </div>
         `).join('')}
     `;
