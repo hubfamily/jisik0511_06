@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관양고등학교 급식 정보 알리미</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>
+            <i class="fas fa-utensils"></i>
+            관양고등학교 급식 정보
+        </h1>
+        <div class="date-selector">
+            <input type="date" id="mealDate">
+            <button onclick="getMealInfo()">
+                <i class="fas fa-search"></i>
+                급식 정보 조회
+            </button>
+        </div>
+        <div class="meal-info" id="mealInfo">
+            <div class="menu-list" id="menuList"></div>
+            <div class="nutrition-info" id="nutritionInfo"></div>
+            <div class="origin-info" id="originInfo"></div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
